@@ -34,7 +34,7 @@ add_action('init_loader', function($loader){
  * Init template context
  */
 add_action('init_template_context', function($init){
-    /* $init['environments']['CUSTOM_FEATURE_ENABLE'] = false; */
+    $init['modules']->push('App');
 });
 
 
