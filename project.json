@@ -1,42 +1,41 @@
 {
-	"name": "Clear theme",
-	"description": "Clear theme",
-	"type": "wordpress",
-	"languages": [
-		"php",
-		"es6"
-	],
-	"entry_points": [
-	],
-	"modules": [
-		{
-			"src": "src",
-			"type": "folder"
-		}
-	],
-	"assets": [
-		{
-			"type": "js",
-			"dest": "assets\/app.js",
-			"modules": [
-				"@app"
-			]
-		},
-		{
-			"type": "js",
-			"dest": "assets\/admin.js",
-			"modules": [
-				"@admin"
-			]
-		},
-		{
-			"type": "js",
-			"dest": "assets\/test.js",
-			"modules": [
-				"@test"
-			]
-		}
-	],
-	"exclude": [],
-	"domains": []
+    "name": "Clear theme",
+    "description": "Clear theme",
+    "type": "wordpress",
+    "languages": [
+        "php",
+        "es6"
+    ],
+    "entry_points": [],
+    "modules": [
+        {
+            "src": "src",
+            "type": "folder"
+        }
+    ],
+    "assets": [
+        {
+            "type": "js",
+            "dest": "assets\/app.js",
+            "modules": [
+                "@app"
+            ]
+        },
+        {
+            "type": "js",
+            "dest": "assets\/admin.js",
+            "modules": [
+                "@admin"
+            ]
+        },
+        {
+            "type": "js",
+            "dest": "assets\/test.js",
+            "modules": [
+                "@test"
+            ]
+        }
+    ],
+    "exclude": [],
+    "domains": []
 }

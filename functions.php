@@ -9,6 +9,10 @@ if (!defined('ABSPATH')) exit;
  */
 function get_app_version()
 {
+    if (WP_DEBUG)
+    {
+        return \Runtime\WordPress\WP_Helper::get_option("app_js_vesion");
+    }
     return "1";
 }
 

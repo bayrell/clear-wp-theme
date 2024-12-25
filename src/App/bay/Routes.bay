@@ -15,8 +15,8 @@ class Routes extends BaseRoute
 	 * Returns layout name
 	 */
 	static string getLayoutName() => "default";
-	
-	
+
+
 	/**
 	 * Returns routes
 	 */
@@ -29,6 +29,12 @@ class Routes extends BaseRoute
 				"uri": "/",
 				"name": "app:index",
 				"model": "App.Components.IndexPage.IndexPageModel",
+			},
+			new RouteModel
+			{
+				"uri": "/test",
+				"name": "app:indextest",
+				"model": "App.Components.TestPage.TestPageModel",
 			},
 		];
 	}

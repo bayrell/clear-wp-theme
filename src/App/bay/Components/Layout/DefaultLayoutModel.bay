@@ -1,0 +1,26 @@
+namespace App.Components.Layout;
+
+use Runtime.Serializer;
+use Runtime.Web.BaseLayoutModel;
+use Runtime.Web.RenderContainer;
+
+
+class DefaultLayoutModel extends BaseLayoutModel
+{
+	/**
+	 * Process frontend data
+	 */
+	void serialize(Serializer serializer, Map data)
+	{
+		parent(serializer, data);
+	}
+	
+	
+	/**
+	 * Load data
+	 */
+	async void loadData(RenderContainer container)
+	{
+		parent(container);
+	}
+}

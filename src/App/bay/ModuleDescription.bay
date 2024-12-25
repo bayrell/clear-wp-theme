@@ -3,27 +3,51 @@ namespace App;
 use Runtime.Entity.Hook;
 use Runtime.Web.Annotations.PageNotFound;
 use Runtime.Web.Annotations.Route;
-use Runtime.Web.Annotations.Widget;
 use Runtime.Web.Hooks.Components;
+use Runtime.Web.Hooks.SetupLayout;
 
 
 class ModuleDescription
 {
+	/**
+	 * Returns module name
+	 */
 	pure string getModuleName() => "App";
+	
+	
+	/**
+	 * Returns module version
+	 */
 	pure string getModuleVersion() => "0.0.1";
+	
+	
+	/**
+	 * Returns required modules
+	 * @return Map<string>
+	 */
 	pure Dict<string> requiredModules() =>
 	{
 		"Runtime.Web": "*",
 		"Runtime.Widget": "*",
 	};
+	
+	
+	/**
+	 * Returns enities
+	 */
 	pure Collection<Dict> entities() =>
 	[
-		Components::header(["App.Components.Blocks.CSS"]),
+		/* Setup layout */
+		SetupLayout::hook({
+			"default": "App.Components.Layout.DefaultLayoutModel",
+		}),
+		
+		/* Components */
+		Components::hook(["App.Components.Blocks.CSS"]),
+		
 		#ifdef BACKEND then
 		new PageNotFound("App.Components.NotFoundPage.NotFoundPageModel"),
 		new Route("App.Routes"),
 		#endif
-		new Widget("App.Components.IndexPage.IndexPageModel"),
-		new Widget("App.Components.NotFoundPage.NotFoundPageModel"),
 	];
 }

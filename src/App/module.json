@@ -1,30 +1,37 @@
 {
-	"name": "App",
-	"assets":
-	[
-		"Components/Blocks/CSS.bay",
-		"Components/IndexPage/IndexPage.bay",
-		"Components/IndexPage/IndexPageModel.bay",
-		"Components/NotFoundPage/NotFoundPage.bay",
-		"Components/NotFoundPage/NotFoundPageModel.bay",
-		"ModuleDescription.bay"
-	],
-	"groups": [
-		"app"
-	],
-	"src": "./bay",
-	"dest":
-	{
-		"php": "./php",
-		"es6": "./es6"
-	},
-	"allow":
-	[
-		"\\.bay$",
-		"\\.php$"
-	],
-	"exclude":
-	[
-		".git"
-	]
+    "name": "App",
+    "assets": [
+        "Components\/Blocks\/CSS.bay",
+        "Components\/IndexPage\/IndexPage.bay",
+        "Components\/IndexPage\/IndexPageModel.bay",
+        "Components\/Layout\/DefaultLayoutModel.bay",
+        "Components\/NotFoundPage\/NotFoundPage.bay",
+        "Components\/NotFoundPage\/NotFoundPageModel.bay",
+        "ModuleDescription.bay"
+    ],
+    "widgets": [
+        {
+            "name": "App.Components.IndexPage.IndexPageModel",
+            "kind": "page"
+        },
+        {
+            "name": "App.Components.NotFoundPage.NotFoundPageModel",
+            "kind": "page"
+        }
+    ],
+    "groups": [
+        "app"
+    ],
+    "src": ".\/bay",
+    "dest": {
+        "php": ".\/php",
+        "es6": ".\/es6"
+    },
+    "allow": [
+        "\\.bay$",
+        "\\.php$"
+    ],
+    "exclude": [
+        ".git"
+    ]
 }
