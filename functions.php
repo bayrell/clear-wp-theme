@@ -30,7 +30,7 @@ add_action('after_setup_theme', function(){
  * Init loader
  */
 add_action('init_loader', function($loader){
-    $loader->addPsr4("App\\",  __DIR__ . "/src/App/php");
+    $loader->add("App",  __DIR__ . "/src/App/php");
 });
 
 
