@@ -9,6 +9,9 @@ class IndexPage extends \Runtime\Web\Component
 		/* Element 'div' */
 		$__v0 = new \Runtime\Vector();
 		
+		/* Component 'Header' */
+		$this->_c($__v0, "App.Components.Blocks.Header", []);
+		
 		/* Component 'Section' */
 		$this->_c($__v0, "Runtime.Widget.Section", ["class" => $this->_class_name(["main_section"])], function (){
 			$__v = new \Runtime\Vector();
@@ -34,6 +37,9 @@ class IndexPage extends \Runtime\Web\Component
 			return $__v;
 		});
 		
+		/* Component 'Footer' */
+		$this->_c($__v0, "App.Components.Blocks.Footer", []);
+		
 		/* Element 'div' */
 		$this->_e($__v, "div", ["class" => $this->_class_name(["main_page"])], $__v0);
 		
@@ -41,7 +47,7 @@ class IndexPage extends \Runtime\Web\Component
 	}
 	static function components()
 	{
-		return \Runtime\Vector::from(["Runtime.Widget.Section","Runtime.Widget.Text"]);
+		return \Runtime\Vector::from(["Runtime.Widget.Section","Runtime.Widget.Text","App.Components.Blocks.Header","App.Components.Blocks.Footer"]);
 	}
 	static function css($vars)
 	{

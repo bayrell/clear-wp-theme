@@ -1,0 +1,9 @@
+<class name="App.Components.Blocks.Header">
+
+<template>
+	<div class="header">
+		<div class="item">Header</div>
+	</div>
+</template>
+
+</class>

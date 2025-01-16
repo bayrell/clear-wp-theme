@@ -1,0 +1,9 @@
+<class name="App.Components.Blocks.Footer">
+
+<template>
+	<div class="footer">
+		<div class="item">Footer</div>
+	</div>
+</template>
+
+</class>

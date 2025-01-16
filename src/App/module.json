@@ -2,6 +2,9 @@
     "name": "App",
     "assets": [
         "Components\/Blocks\/CSS.bay",
+        "Components\/Blocks\/Fonts.bay",
+        "Components\/Blocks\/Header.bay",
+        "Components\/Blocks\/Footer.bay",
         "Components\/IndexPage\/IndexPage.bay",
         "Components\/IndexPage\/IndexPageModel.bay",
         "Components\/Layout\/DefaultLayoutModel.bay",
@@ -10,6 +13,14 @@
         "ModuleDescription.bay"
     ],
     "widgets": [
+        {
+            "name": "App.Components.Blocks.Header",
+            "kind": "widget"
+        },
+        {
+            "name": "App.Components.Blocks.Footer",
+            "kind": "widget"
+        },
         {
             "name": "App.Components.IndexPage.IndexPageModel",
             "kind": "page"

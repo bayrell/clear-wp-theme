@@ -2,6 +2,8 @@
 
 <use name="Runtime.Widget.Section" component="true" />
 <use name="Runtime.Widget.Text" component="true" />
+<use name="App.Components.Blocks.Header" component="true" />
+<use name="App.Components.Blocks.Footer" component="true" />
 
 <style>
 .main_section{
@@ -18,10 +20,12 @@
 
 <template>
 	<div class="main_page">
+		<Header />
 		<Section class="main_section">
 			<h1 class="page_title">Index page</h1>
 			<div class="page_text">Clear project</div>
 		</Section>
+		<Footer />
 	</div>
 </template>
 

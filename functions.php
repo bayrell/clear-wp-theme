@@ -3,17 +3,16 @@
 /* Check if Wordpress */
 if (!defined('ABSPATH')) exit;
 
+/* Include admin */
+include __DIR__ . "/src/Admin/php/admin.php";
 
 /**
  * Returns app version
  */
 function get_app_version()
 {
-    if (WP_DEBUG)
-    {
-        return \Runtime\WordPress\WP_Helper::get_option("app_js_vesion");
-    }
-    return "1";
+    $version = "1";
+    return $version . "_" . \Runtime\WordPress\WP_Helper::get_option("app_js_vesion");
 }
 
 
@@ -31,6 +30,15 @@ add_action('after_setup_theme', function(){
  */
 add_action('init_loader', function($loader){
     $loader->add("App",  __DIR__ . "/src/App/php");
+    $loader->add("App.Admin",  __DIR__ . "/src/Admin/php");
+});
+
+
+/**
+ * Init admin context
+ */
+add_action('init_admin_context', function($init){
+    $init['modules']->push('App.Admin');
 });
 
 

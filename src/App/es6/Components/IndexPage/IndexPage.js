@@ -14,8 +14,11 @@ App.Components.IndexPage.IndexPage = {
 			/* Element 'div' */
 			let __v0 = this._e(__v, "div", {"class":this._class_name(["main_page"])});
 			
+			/* Component 'Header' */
+			let __v1 = this._c(__v0, "App.Components.Blocks.Header", {});
+			
 			/* Component 'Section' */
-			let __v1 = this._c(__v0, "Runtime.Widget.Section", {"class":this._class_name(["main_section"])}, () => {
+			let __v2 = this._c(__v0, "Runtime.Widget.Section", {"class":this._class_name(["main_section"])}, () => {
 				let __v = [];
 				
 				/* Element 'h1' */
@@ -33,6 +36,9 @@ App.Components.IndexPage.IndexPage = {
 				return this._flatten(__v);
 			});
 			
+			/* Component 'Footer' */
+			let __v3 = this._c(__v0, "App.Components.Blocks.Footer", {});
+			
 			return this._flatten(__v);
 		},
 	},
@@ -41,7 +47,7 @@ Object.assign(App.Components.IndexPage.IndexPage,
 {
 	components: function()
 	{
-		return Runtime.Vector.from(["Runtime.Widget.Section","Runtime.Widget.Text"]);
+		return Runtime.Vector.from(["Runtime.Widget.Section","Runtime.Widget.Text","App.Components.Blocks.Header","App.Components.Blocks.Footer"]);
 	},
 	css: function(vars)
 	{
