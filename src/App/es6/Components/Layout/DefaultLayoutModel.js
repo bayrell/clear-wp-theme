@@ -24,6 +24,11 @@ Object.assign(App.Components.Layout.DefaultLayoutModel.prototype,
 	{
 		Runtime.Web.BaseLayoutModel.prototype.loadData.call(this, container);
 	},
+	_init: function()
+	{
+		Runtime.Web.BaseLayoutModel.prototype._init.call(this);
+		this.component = "App.Components.Layout.DefaultLayout";
+	},
 });
 Object.assign(App.Components.Layout.DefaultLayoutModel, Runtime.Web.BaseLayoutModel);
 Object.assign(App.Components.Layout.DefaultLayoutModel,

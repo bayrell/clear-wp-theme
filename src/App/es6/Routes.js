@@ -27,7 +27,7 @@ Object.assign(App.Routes,
 	 */
 	getRoutes: function()
 	{
-		return Runtime.Vector.from([new Runtime.Web.RouteModel(Runtime.Map.from({"uri":"/","name":"app:index","model":"App.Components.IndexPage.IndexPageModel"})),new Runtime.Web.RouteModel(Runtime.Map.from({"uri":"/test","name":"app:indextest","model":"App.Components.TestPage.TestPageModel"}))]);
+		return Runtime.Vector.from([new Runtime.Web.RouteModel(Runtime.Map.from({"uri":"/","name":"app:index","model":"App.Components.Pages.IndexPage.IndexPageModel"})),new Runtime.Web.RoutePage(Runtime.Map.from({"uri":"/thank-you.html","name":"app:thank_you_page","page":"App.Components.Pages.ThankYouPage","data":Runtime.Map.from({"title":"Ваше сообщение успешно отправлено","robots":Runtime.Vector.from(["nofollow","noindex"])})}))]);
 	},
 	/* ======================= Class Init Functions ======================= */
 	getNamespace: function()

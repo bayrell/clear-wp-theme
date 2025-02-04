@@ -7,6 +7,7 @@ namespace App;
 use Runtime.Web.BaseRoute;
 use Runtime.Web.RouteInfo;
 use Runtime.Web.RouteModel;
+use Runtime.Web.RoutePage;
 
 
 class Routes extends BaseRoute
@@ -28,13 +29,17 @@ class Routes extends BaseRoute
 			{
 				"uri": "/",
 				"name": "app:index",
-				"model": "App.Components.IndexPage.IndexPageModel",
+				"model": "App.Components.Pages.IndexPage.IndexPageModel",
 			},
-			new RouteModel
+			new RoutePage
 			{
-				"uri": "/test",
-				"name": "app:indextest",
-				"model": "App.Components.TestPage.TestPageModel",
+				"uri": "/thank-you.html",
+				"name": "app:thank_you_page",
+				"page": "App.Components.Pages.ThankYouPage",
+				"data": {
+					"title": "Ваше сообщение успешно отправлено",
+					"robots": ["nofollow", "noindex"],
+				},
 			},
 		];
 	}

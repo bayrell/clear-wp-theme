@@ -1,0 +1,34 @@
+namespace App.Admin;
+
+
+class ModuleDescription
+{
+	/**
+	 * Returns module name
+	 */
+	pure string getModuleName() => "App.Admin";
+	
+	
+	/**
+	 * Returns module version
+	 */
+	pure string getModuleVersion() => "0.0.1";
+	
+	
+	/**
+	 * Returns required modules
+	 * @return Map<string>
+	 */
+	pure Dict<string> requiredModules() =>
+	{
+		'Runtime': '>=0.12',
+	};
+	
+	
+	/**
+	 * Returns enities
+	 */
+	pure Collection<Dict> entities() =>
+	[
+	];
+}

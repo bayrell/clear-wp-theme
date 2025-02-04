@@ -3,10 +3,14 @@ namespace App.Components.Layout;
 use Runtime.Serializer;
 use Runtime.Web.BaseLayoutModel;
 use Runtime.Web.RenderContainer;
+use App.Components.Layout.DefaultLayout;
 
 
 class DefaultLayoutModel extends BaseLayoutModel
 {
+	string component = classof DefaultLayout;
+	
+	
 	/**
 	 * Process frontend data
 	 */

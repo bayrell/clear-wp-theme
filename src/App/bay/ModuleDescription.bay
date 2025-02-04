@@ -37,16 +37,23 @@ class ModuleDescription
 	 */
 	pure Collection<Dict> entities() =>
 	[
+		new Hook("App.AppHook"),
+		new Hook("Runtime.WordPress.Theme.Metrika"),
+		
 		/* Setup layout */
-		SetupLayout::hook({
+		SetupLayout::create({
 			"default": "App.Components.Layout.DefaultLayoutModel",
 		}),
 		
 		/* Components */
-		Components::hook(["App.Components.Blocks.CSS"]),
+		new Hook(classof Components, {
+			"components": ["App.Components.Blocks.CSS", "App.Components.Blocks.Fonts"],
+			"header": ["App.Components.Blocks.Seo"],
+			"footer": ["App.Components.Blocks.Metrika"],
+		}),
 		
 		#ifdef BACKEND then
-		new PageNotFound("App.Components.NotFoundPage.NotFoundPageModel"),
+		new PageNotFound("App.Components.Pages.NotFoundPage.NotFoundPageModel"),
 		new Route("App.Routes"),
 		#endif
 	];

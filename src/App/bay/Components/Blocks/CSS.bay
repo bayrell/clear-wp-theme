@@ -9,7 +9,12 @@
 <use name="Runtime.Widget.TextArea" component="true" />
 
 <style global="true">
-body, html {
+:root{
+	--widget-font-family: Arial;
+	--widget-font-size: 16px;
+	--widget-color-link: blue;
+}
+body, html{
 	font-family: var(--widget-font-family);
 	font-size: var(--widget-font-size);
 	line-height: var(--widget-line-height);
@@ -17,13 +22,13 @@ body, html {
 	padding: 0;
 	margin: 0;
 }
+.page_title{
+	font-size: 32px;
+	margin: 0px;
+	text-align: center;
+}
 %(TextArea)widget_textarea{
 	min-height: 200px;
-}
-%(Form)form_style1{
-	%(Button)widget_button{
-		background-color: red;
-	}
 }
 </style>
 

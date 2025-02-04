@@ -1,0 +1,15 @@
+<!--
+ *  Metrika
+-->
+
+<class name="App.Components.Blocks.Metrika">
+
+<template>
+
+%if (@.env('METRIKA_ENABLED'))
+{
+}
+
+</template>
+
+</class>

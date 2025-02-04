@@ -1,0 +1,19 @@
+<class name="App.Components.Layout.DefaultLayout" extends="Runtime.Web.DefaultLayout">
+
+<use name="App.Components.Blocks.Footer" component="true" />
+<use name="App.Components.Blocks.Header" component="true" />
+
+<style>
+</style>
+
+<template>
+	<div class="layout_default">
+		<Header />
+		<div class="layout_content">
+			%render this.renderCurrentPage();
+		</div>
+		<Footer />
+	</div>
+</template>
+
+</class>

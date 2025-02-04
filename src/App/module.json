@@ -1,22 +1,46 @@
 {
     "name": "App",
     "assets": [
+        "AppHook.bay",
         "Components\/Blocks\/CSS.bay",
-        "Components\/IndexPage\/IndexPage.bay",
-        "Components\/IndexPage\/IndexPageModel.bay",
+        "Components\/Blocks\/Fonts.bay",
+        "Components\/Blocks\/Footer.bay",
+        "Components\/Blocks\/Header.bay",
+        "Components\/Layout\/DefaultLayout.bay",
         "Components\/Layout\/DefaultLayoutModel.bay",
-        "Components\/NotFoundPage\/NotFoundPage.bay",
-        "Components\/NotFoundPage\/NotFoundPageModel.bay",
+        "Components\/Pages\/IndexPage\/IndexPage.bay",
+        "Components\/Pages\/IndexPage\/IndexPageModel.bay",
+        "Components\/Pages\/NotFoundPage\/NotFoundPage.bay",
+        "Components\/Pages\/NotFoundPage\/NotFoundPageModel.bay",
+        "Components\/Pages\/ThankYouPage.bay",
         "ModuleDescription.bay"
     ],
     "widgets": [
         {
-            "name": "App.Components.IndexPage.IndexPageModel",
+            "name": "App.Components.Blocks.Header",
+            "kind": "widget"
+        },
+        {
+            "name": "App.Components.Blocks.Footer",
+            "kind": "widget"
+        },
+        {
+            "name": "App.Components.Pages.IndexPage.IndexPageModel",
             "kind": "page"
         },
         {
-            "name": "App.Components.NotFoundPage.NotFoundPageModel",
+            "name": "App.Components.Pages.NotFoundPage.NotFoundPageModel",
             "kind": "page"
+        },
+        {
+            "name": "App.Components.Pages.ThankYouPage",
+            "kind": "page"
+        }
+    ],
+    "modules": [
+        {
+            "src": "bay\/WidgetSettings",
+            "type": "module"
         }
     ],
     "groups": [
@@ -32,6 +56,6 @@
         "\\.php$"
     ],
     "exclude": [
-        ".git"
+        "WidgetSettings"
     ]
 }

@@ -12,7 +12,7 @@ class CSS extends \Runtime\Web\Component
 	static function css($vars)
 	{
 		$res = "";
-		$res .= \Runtime\rtl::toStr("body,html{font-family: var(--widget-font-family);font-size: var(--widget-font-size);line-height: var(--widget-line-height);width: 100%;padding: 0;margin: 0}.widget_textarea.h-ee82{min-height: 200px}.form_style1.h-b6a8 .widget_button.h-8dd7{background-color: red}");
+		$res .= \Runtime\rtl::toStr(":root{--widget-font-family: Arial;--widget-font-size: 16px;--widget-color-link: blue}body,html{font-family: var(--widget-font-family);font-size: var(--widget-font-size);line-height: var(--widget-line-height);width: 100%;padding: 0;margin: 0}.page_title{font-size: 32px;margin: 0px;text-align: center}.widget_textarea.h-ee82{min-height: 200px}");
 		return $res;
 	}
 	/* ======================= Class Init Functions ======================= */

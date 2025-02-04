@@ -30,6 +30,13 @@
         },
         {
             "type": "js",
+            "dest": "assets\/constructor.js",
+            "modules": [
+                "@constructor"
+            ]
+        },
+        {
+            "type": "js",
             "dest": "assets\/test.js",
             "modules": [
                 "@test"

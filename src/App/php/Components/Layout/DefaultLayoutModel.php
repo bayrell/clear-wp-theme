@@ -2,6 +2,7 @@
 namespace App\Components\Layout;
 class DefaultLayoutModel extends \Runtime\Web\BaseLayoutModel
 {
+	public $component;
 	/**
 	 * Process frontend data
 	 */
@@ -17,6 +18,11 @@ class DefaultLayoutModel extends \Runtime\Web\BaseLayoutModel
 		parent::loadData($container);
 	}
 	/* ======================= Class Init Functions ======================= */
+	function _init()
+	{
+		parent::_init();
+		$this->component = "App.Components.Layout.DefaultLayout";
+	}
 	static function getNamespace()
 	{
 		return "App.Components.Layout";

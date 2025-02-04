@@ -1,0 +1,16 @@
+<!--
+ *  Seo
+-->
+
+<class name="App.Components.Blocks.Seo">
+
+<template>
+	<title>{{ this.layout.getFullTitle() }}</title>
+	<meta charset={{ this.layout.content_type }} />
+	<meta http-equiv="Content-Type" content={{ "text/html; " ~ this.layout.content_type }} />
+	<meta http-equiv="Content-Language" content={{ this.layout.getLocale() }} />
+	<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+</template>
+
+</class>

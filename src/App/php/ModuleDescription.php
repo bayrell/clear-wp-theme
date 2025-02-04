@@ -29,7 +29,7 @@ class ModuleDescription
 	 */
 	static function entities()
 	{
-		return \Runtime\Vector::from([\Runtime\Web\Hooks\SetupLayout::hook(\Runtime\Map::from(["default"=>"App.Components.Layout.DefaultLayoutModel"])),\Runtime\Web\Hooks\Components::hook(\Runtime\Vector::from(["App.Components.Blocks.CSS"])),new \Runtime\Web\Annotations\PageNotFound("App.Components.NotFoundPage.NotFoundPageModel"),new \Runtime\Web\Annotations\Route("App.Routes")]);
+		return \Runtime\Vector::from([new \Runtime\Entity\Hook("App.AppHook"),new \Runtime\Entity\Hook("Runtime.WordPress.Theme.Metrika"),\Runtime\Web\Hooks\SetupLayout::create(\Runtime\Map::from(["default"=>"App.Components.Layout.DefaultLayoutModel"])),new \Runtime\Entity\Hook("Runtime.Web.Hooks.Components", \Runtime\Map::from(["components"=>\Runtime\Vector::from(["App.Components.Blocks.CSS","App.Components.Blocks.Fonts"]),"header"=>\Runtime\Vector::from(["App.Components.Blocks.Seo"]),"footer"=>\Runtime\Vector::from(["App.Components.Blocks.Metrika"])])),new \Runtime\Web\Annotations\PageNotFound("App.Components.Pages.NotFoundPage.NotFoundPageModel"),new \Runtime\Web\Annotations\Route("App.Routes")]);
 	}
 	/* ======================= Class Init Functions ======================= */
 	static function getNamespace()

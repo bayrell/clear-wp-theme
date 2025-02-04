@@ -1,0 +1,32 @@
+<!--
+ *  ThankYouPage
+-->
+
+<class name="App.Components.Pages.ThankYouPage">
+
+<style>
+.thank_you_page{
+	text-align: center;
+	font-size: 16px;
+	padding-top: 100px;
+}
+.page_title{
+	line-height: 1.2;
+}
+.message{
+	margin: 0;
+	margin-top: 1em;
+	margin-bottom: 1em;
+}
+</style>
+
+<template>
+	<div>
+		<div class="thank_you_page">
+			<h1 class="page_title">Ваше сообщение успешно отправлено</h1>
+			<div class="message">Ожидайте, мы свяжемся с вами</div>
+		</div>
+	</div>
+</template>
+
+</class>

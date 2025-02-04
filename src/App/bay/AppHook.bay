@@ -1,0 +1,26 @@
+namespace App;
+
+use Runtime.Web.ApiResult;
+use Runtime.Web.Hooks.AppHook as BaseAppHook;
+use Runtime.WordPress.Theme.Components.Form.FormModel;
+
+
+class AppHook extends BaseAppHook
+{
+	/**
+	 * Register hooks
+	 */
+	void register_hooks()
+	{
+		this.register("runtime.wordpress::form_submit_event_name", "form_submit_event_name");
+	}
+	
+	
+	/**
+	 * Form submit event name
+	 */
+	void form_submit_event_name(Dict res)
+	{
+		res.set("event_name", "submit");
+	}
+}
