@@ -1,0 +1,24 @@
+{
+	"name": "App.Admin",
+	"assets":
+	[
+		"ModuleDescription.bay"
+	],
+	"groups": [
+        "admin"
+    ],
+	"src": "./",
+	"dest":
+	{
+		"php": "../Source/php",
+		"es6": "../Source/es6"
+	},
+	"allow":
+	[
+		"\\.bay$",
+		"\\.php$"
+	],
+	"exclude":
+	[
+	]
+}

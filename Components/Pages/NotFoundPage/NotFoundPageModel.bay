@@ -1,0 +1,24 @@
+namespace App.Components.Pages.NotFoundPage;
+
+use Runtime.BaseModel;
+use Runtime.Web.RenderContainer;
+use App.Components.Pages.NotFoundPage.NotFoundPage;
+
+
+class NotFoundPageModel extends BaseModel
+{
+	string component = classof NotFoundPage;
+	
+	
+	/**
+	 * Build title
+	 */
+	void buildTitle(RenderContainer container)
+	{
+		/* Set title */
+		this.layout.setPageTitle("Page not found");
+		
+		/* Setup 404 response */
+		container.http_code = 404;
+	}
+}

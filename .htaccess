@@ -1,0 +1,4 @@
+<Files ~ "\.(bay|json|csv|ipynb|php|py|sh|md)$">
+Order allow,deny
+Deny from all
+</Files>

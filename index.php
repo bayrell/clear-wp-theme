@@ -13,6 +13,5 @@ if (!class_exists(\Runtime\rtl::class))
 /* Run web app */
 else
 {
-	$context = \Runtime\rtl::getContext();
-	$context->run($context);
+	render();
 }

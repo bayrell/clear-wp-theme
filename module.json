@@ -1,0 +1,31 @@
+{
+	"name": "App",
+	"assets": [
+		"Components/Blocks/CSS.bay",
+		"Components/Blocks/Fonts.bay",
+		"Components/Blocks/Footer.bay",
+		"Components/Blocks/Header.bay",
+		"Components/Layout/DefaultLayout.bay",
+		"Components/Layout/DefaultLayoutModel.bay",
+		"Components/Pages/IndexPage/IndexPage.bay",
+		"Components/Pages/IndexPage/IndexPageModel.bay",
+		"Components/Pages/NotFoundPage/NotFoundPage.bay",
+		"Components/Pages/NotFoundPage/NotFoundPageModel.bay",
+		"Components/Pages/ThankYouPage.bay",
+		"ModuleDescription.bay"
+	],
+	"groups": [
+		"app"
+	],
+	"src": "./",
+	"dest": {
+		"php": "Source/php",
+		"es6": "Source/es6"
+	},
+	"exclude":
+	[
+		".git",
+		"src/",
+		"functions.php"
+	]
+}

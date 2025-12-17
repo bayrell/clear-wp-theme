@@ -9,35 +9,39 @@
     "entry_points": [],
     "modules": [
         {
-            "src": "src",
-            "type": "folder"
+            "src": "./",
+            "type": "lib"
+        },
+        {
+            "src": "Admin",
+            "type": "lib"
         }
     ],
     "assets": [
         {
             "type": "js",
-            "dest": "assets\/app.js",
+            "dest": "Assets/app.js",
             "modules": [
                 "@app"
             ]
         },
         {
             "type": "js",
-            "dest": "assets\/admin.js",
+            "dest": "Assets/admin.js",
             "modules": [
                 "@admin"
             ]
         },
         {
             "type": "js",
-            "dest": "assets\/constructor.js",
+            "dest": "Assets/constructor.js",
             "modules": [
                 "@constructor"
             ]
         },
         {
             "type": "js",
-            "dest": "assets\/test.js",
+            "dest": "Assets/test.js",
             "modules": [
                 "@test"
             ]

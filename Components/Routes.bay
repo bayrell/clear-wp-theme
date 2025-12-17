@@ -1,0 +1,46 @@
+/*!
+ *  Routes
+ */
+
+namespace App.Components;
+
+use Runtime.Web.BaseRoute;
+use Runtime.Web.RouteInfo;
+use Runtime.Web.RouteModel;
+use Runtime.Web.RoutePage;
+
+
+class Routes extends BaseRoute
+{
+	/**
+	 * Returns layout name
+	 */
+	static string getLayoutName() => "default";
+
+
+	/**
+	 * Returns routes
+	 */
+	static Collection<RouteInfo> getRoutes()
+	{
+		return
+		[
+			new RouteModel
+			{
+				"uri": "/",
+				"name": "app:index",
+				"model": "App.Components.Pages.IndexPage.IndexPageModel",
+			},
+			new RoutePage
+			{
+				"uri": "/thank-you.html",
+				"name": "app:thank_you_page",
+				"page": "App.Components.Pages.ThankYouPage",
+				"data": {
+					"title": "Ваше сообщение успешно отправлено",
+					"robots": ["nofollow", "noindex"],
+				},
+			},
+		];
+	}
+}
