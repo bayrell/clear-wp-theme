@@ -2,6 +2,7 @@ namespace App.Components.Pages.IndexPage;
 
 use Runtime.Entity.Factory;
 use Runtime.BaseModel;
+use Runtime.Serilizer.ObjectType;
 use Runtime.Web.RenderContainer;
 use App.Components.Pages.IndexPage.IndexPage;
 
@@ -9,6 +10,15 @@ use App.Components.Pages.IndexPage.IndexPage;
 class IndexPageModel extends BaseModel
 {
 	string component = classof IndexPage;
+	
+	
+	/**
+	 * Serialize object
+	 */
+	static void serialize(ObjectType rules)
+	{
+		parent(rules);
+	}
 	
 	
 	/**

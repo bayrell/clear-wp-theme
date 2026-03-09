@@ -52,6 +52,23 @@ add_action("wp", function(){
 
 
 /**
+ * Init app
+ */
+add_action("init", function(){
+	if (class_exists(\RankMath::class))
+	{
+		add_filter("rank_math/sitemap/providers", function($providers){
+			return $providers;
+		});
+		if (defined("WP_DEBUG") && WP_DEBUG)
+		{
+			add_filter("rank_math/sitemap/enable_caching", function(){ return false; });
+		}
+	}
+});
+
+
+/**
  * Filter sitemap
  */
 add_filter("wp_sitemaps_add_provider", function($provider, $name){
@@ -150,6 +167,20 @@ add_action("init_loader", function(){
  */
 add_action("init_template_context", function($init){
 	$init->get("modules")->push("App");
+	
+	/* Enable metrika */
+	if (defined("METRIKA_ENABLED"))
+	{
+		$init->get("environments")->set("METRIKA_ENABLED", METRIKA_ENABLED);
+	}
+});
+
+
+/**
+ * Register assets
+ */
+add_action("baylang_register_assets", function($assets){
+	$assets->register("theme", get_template_directory_uri());
 });
 
 

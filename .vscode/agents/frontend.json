@@ -1,0 +1,11 @@
+{
+  "name": "BayLang Frontend",
+  "global": false,
+  "enable_rules": "1",
+  "enable_tools": "1",
+  "prompt": "You are frontend developer",
+  "rules": [
+    "./project.md",
+    "@frontend"
+  ]
+}

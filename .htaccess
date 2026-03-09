@@ -1,4 +1,14 @@
+Options -Indexes
+
 <Files ~ "\.(bay|json|csv|ipynb|php|py|sh|md)$">
 Order allow,deny
 Deny from all
 </Files>
+
+<FilesMatch "^(\.git|\.gitignore)$">
+Order allow,deny
+Deny from all
+</FilesMatch>
+
+# Дополнительно: вернём 404 на все пути, начинающиеся с /.git
+RedirectMatch 404 "^/\.git"

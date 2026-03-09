@@ -11,7 +11,7 @@
 	background-position: center top;
 	background-repeat: no-repeat;
 	background-size: cover;
-	padding-top: 10px;
+	padding-top: var(--space);
 }
 </style>
 

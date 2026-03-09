@@ -1,0 +1,11 @@
+{
+  "name": "BayLang Backend",
+  "global": false,
+  "enable_rules": "1",
+  "enable_tools": "1",
+  "prompt": "You are backend developer",
+  "rules": [
+    "./project.md",
+    "@backend"
+  ]
+}

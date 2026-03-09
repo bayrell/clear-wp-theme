@@ -1,7 +1,7 @@
 namespace App.Components.Layout;
 
 use Runtime.BaseLayout;
-use Runtime.Serializer;
+use Runtime.Serializer.ObjectType;
 use Runtime.Web.RenderContainer;
 use App.Components.Layout.DefaultLayout;
 
@@ -14,9 +14,9 @@ class DefaultLayoutModel extends BaseLayout
 	/**
 	 * Process frontend data
 	 */
-	void serialize(Serializer serializer)
+	static void serialize(ObjectType rules)
 	{
-		parent(serializer);
+		parent(rules);
 	}
 	
 	

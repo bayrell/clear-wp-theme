@@ -23,8 +23,8 @@
 <template>
 	<div>
 		<div class="thank_you_page">
-			<h1 class="page_title">Ваше сообщение успешно отправлено</h1>
-			<div class="message">Ожидайте, мы свяжемся с вами</div>
+			<h1 class="page_title">Your message has been sent successfully</h1>
+			<div class="message">Please wait, we'll get in touch with you</div>
 		</div>
 	</div>
 </template>

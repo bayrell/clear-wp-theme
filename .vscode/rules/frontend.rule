@@ -1,0 +1,1343 @@
+---
+description: BayLang frontend
+groups: frontend
+---
+
+# Api
+
+Api interaction is handled via the `sendApi` method.
+
+Example:
+```
+ApiResult result = await this.layout.sendApi({
+	"api_name": "app.catalog",
+	"method_name": "search",
+	"data":
+	{
+		"search": "product",
+		"page": 0,
+		"limit": 10,
+	},
+});
+if (result.isSuccess())
+{
+}
+```
+
+Api operates using the Data Bus pattern between system components. The `Runtime.BusInterface` system interface is responsible for this.
+
+Its implementation is available in `layout` via `sendApi`.
+
+```
+/**
+ * Send api
+ */
+async ApiResult sendApi(Map params)
+{
+	BusInterface api = @.provider("api");
+	#ifdef BACKEND then
+	params.set("storage", this.storage.backend);
+	#endif
+	return await api.send(params);
+}
+```
+
+The implementation uses the Api provider and calls the `send` method.
+
+If you need to use the API for communication between microservices, you should use the system data bus and specify the name of the service to address.
+
+Example:
+
+```
+BusInterface api = @.provider("system_bus");
+ApiResult result = api.send({
+	"service": "service_name",
+	"api_name": "app.catalog",
+	"method_name": "search",
+	"data":
+	{
+		"search": "product",
+		"page": 0,
+		"limit": 10,
+	},
+});
+```
+
+# Page
+
+To create a page, you need to create a model and a component. The model stores the state and business logic of the system, while the component displays this state.
+
+Example model:
+
+```
+namespace App.Components.Pages.IndexPage;
+
+use Runtime.BaseModel;
+use Runtime.Serializer.ObjectType;
+use Runtime.Serializer.StringType;
+use Runtime.Web.RenderContainer;
+use App.Components.Pages.IndexPage.IndexPage;
+
+class IndexPageModel extends BaseModel
+{
+	string component = classof IndexPage;
+	string message = "Hello world!";
+	
+	
+	/**
+	 * Serialize object
+	 */
+	static void serialize(ObjectType rules)
+	{
+		parent(rules);
+		rules.addType("message", new StringType());
+	}
+	
+	
+	/**
+	 * Load data
+	 */
+	async void loadData(RenderContainer container)
+	{
+		await parent(container);
+	}
+	
+	
+	/**
+	 * Set message
+	 */
+	void setMessage(string message)
+	{
+		this.message = message;
+	}
+	
+	
+	/**
+	 * Build title
+	 */
+	void buildTitle(RenderContainer container)
+	{
+		container.layout.setPageTitle("Index page");
+	}
+}
+```
+
+Example component:
+
+```
+<class name="App.Components.Pages.IndexPage.IndexPage">
+
+<use name="Runtime.Widget.Button" component="true" />
+
+<style>
+.index_page{
+	padding-top: 100px;
+	text-align: center;
+	.message{
+		margin-bottom: var(--space);
+	}
+}
+</style>
+
+<template>
+	<div class="page index_page">
+		<div class="message">{{ this.model.message }}</div>
+		<Button class="button--default" @event:click="this.onClick()">Click</Button>
+	</div>
+</template>
+
+<script>
+
+void onClick()
+{
+	this.model.setMessage(this.model.message ~ "!");
+}
+
+</script>
+
+</class>
+```
+
+It also needs to be registered in the routes:
+
+```
+namespace App.Components;
+
+class Routes extends BaseRoute
+{
+	/**
+	 * Returns layout name
+	 */
+	static string getLayoutName() => "default";
+	
+	
+	/**
+	 * Returns routes
+	 */
+	static Collection<RouteInfo> getRoutes() =>
+	[
+		new RouteModel
+		{
+			"uri": "/{lang}/",
+			"name": "app:index",
+			"model": "App.Components.Pages.IndexPage.IndexPageModel",
+		},
+	];
+}
+```
+
+# Setup project
+
+An example PHP project is available at [https://github.com/bayrell/project_php](https://github.com/bayrell/project_php)
+
+**Project Structure**
+
+```
+files
+src
+  app
+    Components
+      Blocks
+        CSS.bay
+        Scripts.bay
+      Layout
+        DefaultLayout.bay
+        DefaultLayoutModel.bay
+      Pages
+        IndexPage
+          IndexPage.bay
+          IndexPageModel.bay
+      Routes.bay
+    ModuleDescription.bay
+  public
+    assets
+    index.php
+  project.json
+.dockerignore
+build.sh
+Dockerfile
+```
+
+## ModuleDescription
+
+ModuleDescription is the main file of a module. Its purpose is to declare dependencies and module settings.
+
+Example:
+```
+namespace App;
+
+use Runtime.Entity.Hook;
+use Runtime.Web.Annotations.Route;
+use Runtime.Web.Hooks.PageNotFound;
+use Runtime.Web.Hooks.Components;
+use Runtime.Web.Hooks.SetupLayout;
+
+
+class ModuleDescription
+{
+    /**
+     * Returns module name
+     */
+    pure string getModuleName() => "App";
+    
+    
+    /**
+     * Returns module version
+     */
+    pure string getModuleVersion() => "0.0.1";
+    
+    
+    /**
+     * Returns required modules
+     * @return Map<string>
+     */
+    pure Dict<string> requiredModules() =>
+    {
+        "Runtime.Web": "*",
+        "Runtime.Widget": "*",
+    };
+    
+    
+    /**
+     * Returns enities
+     */
+    pure Collection<Dict> entities() =>
+    [		
+        /* Setup layout */
+        SetupLayout::hook({
+            "default": "App.Components.Layout.DefaultLayoutModel",
+        }),
+        
+        /* Components */
+        Components::hook([
+            "App.Components.Blocks.CSS",
+        ]),
+        Components::footer([
+            "App.Components.Blocks.Script"
+        ]),
+        
+        PageNotFound::hook("App.Components.Pages.NotFoundPage.NotFoundPageModel"),
+        
+        #ifdef BACKEND then
+        new Route("App.Components.Pages.Routes"),
+        #endif
+    ];
+}
+```
+
+Methods:
+- getModuleName - Module name
+- getModuleVersion - Module version
+- requiredModules - Module dependencies
+- entities - Module settings
+
+Settings:
+- SetupLayout - Layout configuration. Contains information about the layout model that should be initialized by `layout_name`.
+- Components::hook - Adds components as dependencies (to the header/body).
+- Components::footer - Adds components to the website's footer.
+- PageNotFound::hook - Sets the model for the "page not found" error.
+- Route - List of website routes.
+
+More details on the list of settings can be found in [Hooks](hooks).
+
+
+## project.json Configuration
+
+This file contains project settings and compilation rules.
+
+```
+{
+    "name": "Project name",
+    "description": "Description",
+    "license": "MIT",
+    "author": "",
+    "languages": ["php", "es6"],
+    "modules": [
+        {
+            "src": "app",
+            "type": "module"
+        },
+        {
+            "src": "lib",
+            "type": "folder"
+        }
+    ],
+    "assets": [
+        {
+            "type": "js",
+            "dest": "public/assets/app.js",
+            "modules": [
+                "@app"
+            ]
+        }
+    ],
+    "exclude": []
+}
+```
+
+Parameters:
+- name - Project name
+- description - Project description
+- languages - Languages into which the project should be compiled
+- modules - List of project modules
+- assets - Bundles that will be assembled
+
+
+## module.json Configuration
+
+This file contains module settings.
+
+```
+{
+    "name": "App",
+    "assets": [
+        "Components/Blocks/CSS.bay",
+        "Components/Blocks/Script.bay",
+        "Components/Layout/DefaultLayout.bay",
+        "Components/Layout/DefaultLayoutModel.bay",
+        "Components/Pages/IndexPage/IndexPage.bay",
+        "Components/Pages/IndexPage/IndexPageModel.bay",
+        "Components/Pages/NotFoundPage/NotFoundPage.bay",
+        "Components/Pages/NotFoundPage/NotFoundPageModel.bay",
+        "ModuleDescription.bay"
+    ],
+    "src": "./",
+    "dest":
+    {
+        "php": "../source/php",
+        "es6": "../source/es6"
+    },
+    "groups": [
+        "app"
+    ],
+    "exclude": [
+        "vendor"
+    ]
+}
+```
+
+Parameters:
+- name - Module name
+- assets - List of files to include in the bundle
+- src - Name of the folder with Baylang source code
+- dest - Path where files should be compiled
+- groups - List of module groups
+- exclude - Which folders to exclude
+
+# Routes
+
+To declare routing, it must be registered in ModuleDescription.
+
+```
+pure Vector<Entity> entities() =>
+[
+	new Route("App.Components.Pages.Routes"),
+];
+```
+
+Then create the `App.Components.Pages.Routes` file.
+
+```
+namespace App.Components.Pages;
+
+use Runtime.Web.BaseRoute;
+use Runtime.Web.RouteInfo;
+use Runtime.Web.RouteModel;
+
+
+class Routes extends BaseRoute
+{
+	/**
+	 * Returns layout name
+	 */
+	static string getLayoutName() => "default";
+	
+	
+	/**
+	 * Returns routes
+	 */
+	static Vector<RouteInfo> getRoutes() =>
+	[
+		new RouteModel
+		{
+			"uri": "/",
+			"name": "app:index",
+			"model": "App.Components.Pages.IndexPage.IndexPageModel"
+		}
+	];
+}
+```
+
+Methods:
+- `getLayoutName` - Declares the name of the layout that will be displayed. The list of layouts is registered via `SetupLayout::hook`.
+- `getRoutes` - Registers the application routes.
+
+Route types:
+- `RouteAction` - A function will be called to handle the request.
+- `RouteModel` - A page model will be called.
+- `RoutePage` - A component will be displayed.
+
+
+Example `RouteAction`:
+```
+namespace App.Components;
+
+class Routes extends BaseRoute
+{
+	static Vector<RouteInfo> getRoutes() =>
+	[
+		new RouteAction
+		{
+			"uri": "/",
+			"name": "app:root",
+			"action": "actionRedirect",
+		},
+		new RouteAction
+		{
+			"uri": "/{lang}",
+			"name": "app:root:lang",
+			"action": "actionRedirect",
+		},
+	];
+	
+	
+	/**
+	 * Action redirect
+	 */
+	static async void actionRedirect(RenderContainer container)
+	{
+		string lang = container.layout.lang;
+		if (container.route.name == "app:root") lang = "en";
+		container.setResponse(new RedirectResponse("/" ~ lang ~ "/"));
+	}
+}
+```
+
+
+Example `RoutePage`:
+
+```
+namespace App.Components.Pages;
+
+use Runtime.Web.BaseRoute;
+use Runtime.Web.RouteInfo;
+use Runtime.Web.RoutePage;
+
+
+class Routes extends BaseRoute
+{
+	/**
+	 * Returns layout name
+	 */
+	static string getLayoutName() => "default";
+	
+	
+	/**
+	 * Returns routes
+	 */
+	static Vector<RouteInfo> getRoutes() =>
+	[
+		new RoutePage
+		{
+			"uri": "/",
+			"name": "app:index",
+			"page": "App.Components.Pages.IndexPage.IndexPage",
+			"data":
+			{
+				"title": "Index page"
+			},
+		}
+	];
+}
+```
+
+## URL parameters
+
+Parameters can be added to the URL:
+
+```
+new RouteModel
+{
+	"uri": "/{lang}/catalog/{id}",
+	"name": "app:catalog:item",
+	"model": "App.Components.Pages.Catalog.ItemPageModel",
+}
+```
+
+In the model, these parameters can be retrieved via the container:
+
+```
+namespace App.Components.Pages.Catalog;
+
+use Runtime.BaseModel;
+use App.Components.Pages.Catalog.IndexPage;
+
+
+class ItemPageModel extends BaseModel
+{
+	string component = classof IndexPage;
+	Vector<Product> items = [];
+	
+	
+	/**
+	 * Serialize object
+	 */
+	static void serialize(ObjectType rules)
+	{
+		parent(rules);
+		rules.addType("items", new VectorType(new ObjectType{
+			"class_name": classof Product,
+		}));
+	}
+	
+	
+	/**
+	 * Load data
+	 */
+	async void loadData(RenderContainer container)
+	{
+		await parent(container);
+		
+		int id = container.route.matches.get("id");
+		ApiResult result = await this.layout.sendApi({
+			"api_name": "app.catalog",
+			"method_name": "item",
+			"data": {
+				"lang": this.layout.lang,
+				"pk": {
+					"id": id,
+				}
+			},
+		});
+		if (result.isSuccess())
+		{
+			this.items = result.data.get("items");
+		}
+	}
+}
+```
+
+In this case, data will be loaded from the backend via API. The model will be automatically serialized and restored on the frontend.
+
+# Search engine optimization
+
+To specify the title and description, you need to create a `buildTitle` function in your page model:
+
+```
+/**
+ * Build title
+ */
+void buildTitle(RenderContainer container)
+{
+	string title = "Page title";
+	string description = "Page description";
+	if (this.layout.lang == "ru")
+	{
+		title = "Заголовок страницы";
+		description = "Главная страница";
+	}
+	this.layout.setPageTitle(title);
+	this.layout.setDescription(description);
+}
+```
+
+You can also add a hook to `ModuleDescription`:
+
+```
+namespace App;
+
+use Runtime.Widget.Seo.Seo;
+
+class ModuleDescription
+{
+    pure Vector<Entity> entities() =>
+    [
+        Seo::hook(),
+    ];
+}
+```
+
+This hook creates a `SeoModel` and adds OpenGraph meta tags.
+
+`SeoModel` is a model for additional tag management.
+
+```
+use Runtime.Widget.Seo.SeoModel;
+
+void buildTitle(RenderContainer container)
+{
+    SeoModel seo = this.layout.get("seo");
+}
+```
+
+`SeoModel` parameters:
+- `favicon`
+- `canonical_url`
+- `article_published_time`
+- `article_modified_time`
+- `robots`
+- `tags`
+
+# Data serialization
+
+The web framework allows you to transfer data from the frontend to the backend and validate it according to defined rules.
+
+
+## Checking maps
+
+The MapType is used for validating Map structures. You can define rules for each expected key.
+
+```
+use Runtime.Unit.AssertException;
+use Runtime.Serializer.MapType;
+use Runtime.Serializer.StringType;
+use Runtime.Serializer.TypeError;
+
+Map data = {
+	"name": "User",
+};
+
+MapType rules = new MapType{
+	"name": new StringType(),
+};
+
+Map new_data = serializer.filter(data, errors);
+if (errors.count() > 0)
+{
+	string message = rs::join(", ", TypeError::getMessages(error))
+	throw new AssertException(message);
+}
+```
+
+
+## Checking vectors
+
+The VectorType is used for validating Vector structures. You define one rule that applies to all elements within the vector.
+
+```
+use Runtime.Unit.AssertException;
+use Runtime.Serializer.MapType;
+use Runtime.Serializer.StringType;
+use Runtime.Serializer.TypeError;
+use Runtime.Serializer.VectorType;
+
+Map data = {
+	"name": "User",
+	"fruits": ["apple", "banana", "cherry", "grape", "orange", "watermelon"],
+};
+
+MapType rules = new MapType{
+	"name": new StringType(),
+	"fruits": new VectorType(new StringType()),
+};
+
+Vector errors = [];
+Map new_data = rules.filter(data, errors);
+if (errors.count() > 0)
+{
+	string message = rs::join(", ", TypeError::getMessages(errors));
+	throw new AssertException(message);
+}
+```
+
+
+## Checking complex data
+
+For more complex data structures, especially when dealing with nested objects or specific rules for different parts of your data, you can use nested rules.
+
+```
+use Runtime.Unit.AssertException;
+use Runtime.Serializer.MapType;
+use Runtime.Serializer.StringType;
+use Runtime.Serializer.TypeError;
+use Runtime.Serializer.VectorType;
+
+Map data = {
+	"profile": {
+		"name": "User",
+		"fruits": ["apple", "banana", "cherry", "grape", "orange", "watermelon"],
+	},
+	"settings": {
+		"theme": "dark",
+		"lang": "en",
+	},
+};
+
+MapType rules = new MapType{
+	"profile": new MapType{
+		"name": new StringType(),
+		"fruits": new VectorType(new StringType()),
+	},
+	"settings": new MapType{
+		"theme": new StringType(),
+		"lang": new StringType(),
+	}
+};
+
+Vector errors = [];
+Map new_data = serializer.filter(data, errors);
+if (errors.count() > 0)
+{
+	string message = rs::join(", ", TypeError::getMessages(errors));
+	throw new AssertException(message);
+}
+```
+
+## Checking objects
+
+BayLang objects can implement SerializeInterface to define their own serialization rules.
+
+```
+namespace App.Models;
+
+use Runtime.Unit.AssertException;
+use Runtime.Serializer.MapType;
+use Runtime.Serializer.ObjectType;
+use Runtime.Serializer.StringType;
+use Runtime.Serializer.TypeError;
+use Runtime.Serializer.VectorType;
+use Runtime.SerializeInterface;
+
+class User extends BaseObject implements SerializeInterface
+{
+	string name = "";
+	Vector fruits = [];
+	
+	
+	/**
+	 * Serialize object
+	 */
+	static void serialize(ObjectType rules)
+	{
+		parent(rules);
+		rules.addType("name", new StringType());
+		rules.addType("fruits", new VectorType(new StringType()));
+	}
+}
+
+Map data = {
+	"name": "User",
+	"fruits": ["apple", "banana", "cherry", "grape", "orange", "watermelon"],
+};
+
+User user = new User();
+Vector errors = [];
+rtl::assign(user, data, errors);
+
+if (errors.count() > 0)
+{
+	string message = TypeError::getMessages(errors);
+	throw new AssertException(message);
+}
+```
+
+
+## Serialization
+
+To serialize object use rtl::serialize.
+
+```
+User user = new User();
+user.name = "User";
+
+Map data = rtl::serialize(user);
+```
+
+
+## Creating own data type
+
+You can implements Runtime.Serializer.BaseType to create custom validation or transformation logic.
+
+```
+namespace App.Serializer;
+
+use Runtime.Serializer.BaseType;
+
+class CustomType implements BaseType
+{
+	/**
+	 * Filter value
+	 */
+	var filter(var value, Vector errors)
+	{
+		return value;
+	}
+	
+	
+	/**
+	 * Returns data
+	 */
+	var serialize(var value)
+	{
+		return value;
+	}
+}
+```
+
+# Components
+
+Registers components in the system. Sometimes it is necessary to add additional components to the system.
+
+Adding components to CSS styles:
+```
+/* Components */
+Components::hook([
+	"App.Components.Blocks.CSS",
+	"App.Components.Pages.IndexPage.IndexPage",
+	"App.Components.Pages.NotFoundPage.NotFoundPage",
+])
+```
+
+Adding components to the header block:
+```
+/* Header */
+Components::header([
+	"App.Components.Blocks.CSS",
+	"App.Components.Blocks.Seo",
+])
+```
+
+Adding components to the footer:
+```
+/* Footer */
+Components::footer([
+	"App.Components.Blocks.Metrika",
+])
+```
+
+# Create custom hook
+
+Create file
+
+```
+namespace App.Hooks;
+
+use Runtime.BaseLayout;
+use Runtime.RenderContainer;
+use Runtime.Hooks.BaseHook;
+use Runtime.Hooks.RuntimeHook;
+use Runtime.Web.Hooks.AppHook as WebHook;
+
+
+class AppHook extends BaseHook
+{
+	/**
+	 * Register hooks
+	 */
+	void register_hooks()
+	{
+		this.register(WebHook::ROUTE_AFTER, "routeAfter");
+	}
+	
+	
+	/**
+	 * Route after
+	 */
+	void routeAfter(Map params)
+	{
+		RenderContainer container = params.get("container");
+	}
+}
+```
+
+Register hook in ModuleDescription
+
+```
+namespace App;
+
+class ModuleDescription
+{
+	Vector<Entity> entities() =>
+	[
+		new Hook("App.Hooks.AppHook"),
+	];
+}
+```
+
+# DetectLanguage
+
+This hook allows automatic language detection by URL. After the detection, the hook sets the `lang` parameter for the Layout.
+
+In ModuleDescription add:
+```
+/* Languages */
+DetectLanguage::hook({
+	"default_language": "en",
+	"allowed_languages": ["en", "ru"],
+})
+```
+
+Options:
+- allowed_languages - allowed languages
+- default_language - This is the default language that will be selected for the site
+- route_match_name - A Route parameter that will be responsible for the language. Usually it’s lang
+
+Example Route:
+```
+new RouteModel
+{
+	"uri": "/{lang}/page",
+	"name": "app:page",
+	"model": "App.Components.Pages.CustomPage.CustomPageModel",
+}
+```
+
+# DetectTheme
+
+A hook that helps to detect the site’s theme based on cookies.
+
+Installation:
+```
+new DetectTheme::hook()
+```
+
+Options:
+- cookie_name - Cookie parameter for the theme. Default is `theme`.
+
+# PageNotFound
+
+Hook that registers the page not found component.
+
+Example:
+```
+PageNotFound::hook("App.Components.Pages.NotFoundPage.NotFoundPageModel")
+```
+
+# SetupLayout
+
+Setting up the Layout for the entire website. Allows registering layout names and defining a model for each of them.
+
+Example:
+```
+/* Setup layout */
+SetupLayout::hook({
+	"default": "App.Components.Layout.DefaultLayoutModel",
+}),
+```
+
+# Website Styles
+
+## Dimensions and Spacing
+
+CSS Variables:
+```
+--font-family
+--font-size
+--font-size-h1
+--font-size-h2
+--font-size-h3
+--font-size-h4
+--font-size-h5
+--font-size-h6
+--font-input-size
+--line-height
+--space
+
+/* Border */
+--border-radius
+--border-radius-large
+--border-width
+
+/* Width */
+--content-max-width
+--content-tablet-width
+--content-mobile-width
+
+/* Дополнительные отступы */
+--padding-desktop
+--padding-tablet
+--padding-mobile
+```
+
+## Site Color Palette
+
+CSS Variables:
+```
+/* Color */
+--color-background
+--color-surface
+--color-border
+--color-shadow
+
+/* Primary Colors */
+--color-primary
+--color-primary-border
+--color-primary-hover
+--color-primary-text
+
+/* Secondary Colors */
+--color-secondary
+--color-secondary-border
+--color-secondary-hover
+--color-secondary-text
+
+/* Success Colors */
+--color-success
+--color-success-border
+--color-success-hover
+--color-success-text
+
+/* Danger Colors */
+--color-danger
+--color-danger-danger
+--color-danger-hover
+--color-danger-text
+
+/* Warning Colors */
+--color-warning
+--color-warning-border
+--color-warning-hover
+--color-warinng-text
+
+/* Info Colors */
+--color-info
+--color-info-border
+--color-info-hover
+--color-info-text
+
+/* Text Colors */
+--color-text
+--color-text-secondary
+--color-heading-text
+--color-link
+--color-link-hover
+
+/* Hover & Active States */
+--color-default-hover
+--color-selected
+--color-selected-text
+
+/* Shadow */
+--shadow-small
+--shadow-medium
+--shadow-large
+```
+
+# Runtime.Widget.Button
+
+Component for working with buttons
+
+Usage examples:
+```
+<class name="App.Example">
+
+<use name="Runtime.Widget.Button" component="true" />
+
+<template>
+    <Button @event:click="this.onClick()">Click</Button>
+</template>
+
+<script>
+void onClick()
+{
+    rtl::print("Click");
+}
+</script>
+
+</class>
+```
+
+You can add a class to the button to change its properties:
+```
+<Button class="button--primary">Click</Button>
+```
+
+Button properties:
+- button--small - Small button
+- button--large - Large button
+- button--primary - Primary button
+- button--secondary - Secondary button
+- button--outline - Button without background, border only
+- button--danger - Danger button
+- button--success - Success button
+- button--info - Informational button
+- button--warning - Warning button
+- button--stretch - Stretch the button to the full width
+
+# Runtime.Widget.Image
+
+Component for working with images
+
+Usage examples:
+```
+<class name="App.Example">
+
+<use name="Runtime.Widget.Image" component="true" />
+
+<template>
+    <Image src={{ this.layout.assets("image.png") }} />
+</template>
+
+</class>
+```
+
+If the image src value is not specified, the message “No image” will be displayed
+
+
+## Component Override
+
+You can also change the behavior and create your own component:
+```
+<class name="App.Components.Image" extends="Runtime.Widget.Image">
+
+<style>
+.image__no_image{
+    max-width: 100px;
+    max-height: 100px;
+}
+</style>
+
+<template name="renderNoImage">
+    <div class="image__no_image">Image not found</div>
+</template>
+
+</class>
+```
+
+Create a hook:
+```
+namespace App.Hooks;
+
+use Runtime.Hooks.RuntimeHook;
+use Runtime.Providers.RenderProvider;
+
+class AppHook extends RuntimeHook
+{
+    void register_hooks()
+    {
+        this.register(RuntimeHook::START, "start");
+    }
+    
+    
+    /**
+     * Start app
+     */
+    void start()
+    {
+        RenderProvider render = @.provider("render");
+        render.addComponent("Runtime.Widget.Image", "App.Components.Image");
+    }
+}
+```
+
+Register the hook in ModuleDescription:
+```
+namespace App;
+
+use Runtime.Annotations.Hook;
+
+class ModuleDescription
+{
+    pure Vector getEntities() =>
+    [
+        new Hook("App.Hooks.AppHook"),
+    ];
+}
+```
+
+# Runtime.Widget.Input
+
+Input field
+
+Usage example:
+```bay
+<class name="App.Example">
+
+<use name="Runtime.Widget.Input" component="true" />
+
+<template>
+    <Input
+        name="username"
+        value={{ this.username }}
+        @event:valueChange="this.setUsername(event.value)"
+    />
+</template>
+
+<script>
+string username = "";
+void setUsername(string name)
+{
+    this.username = name;
+}
+</script>
+
+</class>
+```
+
+# Runtime.Widget.Select
+
+Selection from a list
+
+Usage example:
+```bay
+<class name="App.Example">
+
+<use name="Runtime.Widget.Select" component="true" />
+
+<template>
+    <Select
+        name="username"
+        value={{ this.usertype }}
+        options=[
+            {"key": "user", "value": "User"},
+            {"key": "admin", "value": "Admin"},
+        ]
+        @event:valueChange="this.setUserType(event.value)"
+    />
+</template>
+
+<script>
+string usertype = "";
+void setUserType(string usertype)
+{
+    this.usertype = usertype;
+}
+</script>
+
+</class>
+```
+
+# Runtime.Widget.TextArea
+
+Text component
+
+Usage example:
+```bay
+<class name="App.Example">
+
+<use name="Runtime.Widget.TextArea" component="true" />
+
+<template>
+    <TextArea
+        name="textarea"
+        value={{ this.text }}
+        @event:valueChange="this.setText(event.value)"
+    />
+</template>
+
+<script>
+string text = "";
+void setText(string text)
+{
+    this.text = text;
+}
+</script>
+
+</class>
+```
+
+# Runtime.Widget.TextEditable
+
+Text component
+
+
+```bay
+<class name="App.Example">
+
+<use name="Runtime.Widget.TextEditable" component="true" />
+
+<template>
+    <TextEditable
+        name="textarea"
+        value={{ this.text }}
+        @event:valueChange="this.setText(event.value)"
+    />
+</template>
+
+<script>
+string text = "";
+void setText(string text)
+{
+    this.text = text;
+}
+</script>
+
+</class>
+```
+
+# Runtime.Widget.UploadFileButton
+
+File upload component
+
+Usage examples:
+```
+<class name="App.Example">
+
+<use name="Runtime.Widget.UploadFileButton" component="true" />
+
+<template>
+    <UploadFileButton @event:file="this.onUploadFileClick(event.value)">
+        Click
+    </UploadFileButton>
+</template>
+
+<script>
+void onUploadFileClick(var file)
+{
+    var_dump(file);
+}
+</script>
+
+</class>
+```
+

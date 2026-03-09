@@ -1,0 +1,1040 @@
+---
+description: BayLang backend
+groups: backend
+---
+
+# Api
+
+Api interaction is handled via the `sendApi` method.
+
+Example:
+```
+ApiResult result = await this.layout.sendApi({
+	"api_name": "app.catalog",
+	"method_name": "search",
+	"data":
+	{
+		"search": "product",
+		"page": 0,
+		"limit": 10,
+	},
+});
+if (result.isSuccess())
+{
+}
+```
+
+Api operates using the Data Bus pattern between system components. The `Runtime.BusInterface` system interface is responsible for this.
+
+Its implementation is available in `layout` via `sendApi`.
+
+```
+/**
+ * Send api
+ */
+async ApiResult sendApi(Map params)
+{
+	BusInterface api = @.provider("api");
+	#ifdef BACKEND then
+	params.set("storage", this.storage.backend);
+	#endif
+	return await api.send(params);
+}
+```
+
+The implementation uses the Api provider and calls the `send` method.
+
+If you need to use the API for communication between microservices, you should use the system data bus and specify the name of the service to address.
+
+Example:
+
+```
+BusInterface api = @.provider("system_bus");
+ApiResult result = api.send({
+	"service": "service_name",
+	"api_name": "app.catalog",
+	"method_name": "search",
+	"data":
+	{
+		"search": "product",
+		"page": 0,
+		"limit": 10,
+	},
+});
+```
+
+# BaseApi
+
+```
+namespace App.Api;
+
+use Runtime.Serializer.MapType;
+use Runtime.Serializer.StringType;
+use Runtime.Web.Annotations.ApiMethod;
+use Runtime.Web.BaseApi;
+
+class ExampleApi extends BaseApi
+{
+	pure string getApiName() => "app.example";
+	
+	
+	@ApiMethod{ "name": "index" }
+	async void actionIndex()
+	{
+		this.data = this.filter(this.request.data, new MapType{
+			"name": new StringType(),
+		});
+		
+		this.success({
+			"data": {
+				"name": name,
+			}
+		})
+	}
+}
+```
+
+Register api in module:
+```
+namespace App;
+
+use Runtime.Entity.Entity;
+use Runtime.Web.Annotations.Api;
+
+class ModuleDescription
+{
+	pure string getModuleName() => "App";
+	pure string getModuleVersion() => "1.0";
+	pure Map<string> requiredModules() => {
+		"Runtime": "*"
+	};
+	pure Vector<Entity> modules() => [
+		new Api("App.Api.ExampleApi")
+	];
+}
+```
+
+# SearchApi and SaveApi
+
+This documentation describes the use of the basic API modules `SearchApi` and `SaveApi`, designed for rapid development of RESTful API endpoints. These modules allow you to create, read, update, and delete (CRUD) data with a minimal amount of code, providing flexible mechanisms for validation, filtering, and data transformation.
+
+
+## Example database
+
+```
+namespace App.Database;
+
+use Runtime.BaseObject;
+use Runtime.ORM.Record;
+use Runtime.ORM.Annotations.AutoIncrement;
+use Runtime.ORM.Annotations.BigIntType;
+use Runtime.ORM.Annotations.Primary;
+use Runtime.ORM.Annotations.StringType;
+
+
+class Item extends Record
+{
+	/**
+     * Returns table name
+     */
+    pure string getTableName() => "forms";
+	
+	
+	/**
+	 * Returns table schema
+	 */
+	pure memorize Collection<BaseObject> schema() =>
+	[
+		/* Fields */
+		new BigIntType{"name": "id"},
+		new StringType{"name": "name"},
+		new StringType{"name": "description"},
+		new BigIntType{"name": "category_id"},
+		new DateTimeType{"name": "gmtime_add", "autocreate": true},
+		new DateTimeType{"name": "gmtime_edit", "autoupdate": true},
+		
+		/* Index */
+		new AutoIncrement{"name": "id"},
+		new Primary{"keys": ["id"]},
+	];
+}
+```
+
+
+## Search
+
+The `SearchApi` module provides basic functionality for creating API endpoints designed for searching and retrieving data from a database. It is developed for flexible query configuration and result processing.
+
+**Key Features**
+
+- **Automatic Query Generation**: Building database queries based on API request parameters.
+- **Input Data Validation**: Checking request parameters (filters, limits, pages).
+- **Flexible Field Definition**: Ability to specify which entity fields should be returned.
+- **Query Customization**: Mechanisms for adding complex filtering conditions, sorting, and joins.
+- `search`: Searching and retrieving a list of records with pagination.
+- `item`: Retrieving a single record by its primary key.
+
+
+## Methods SearchApi
+
+- **getApiName**: Used for routing. Returns a unique name for your API.
+- **getRecordName**: Returns the name of the entity class (Record) that the API works with.
+- **getMiddleware**: Defines a list of Middleware for authentication, authorization, etc.
+- **getDataRules**: Defines validation rules for incoming request data (e.g., filters).
+- **getItemFields**: Defines a list of fields that will be included in the search result. If the list is empty, all entity fields are returned.
+- **buildQuery**: Allows modifying the Query object before performing the search. Here you can add filtering conditions, sorting, joins, and other query parameters.
+- **convertItem**: Allows transforming the data of each record before it is returned in the response.
+
+
+## SearchApi Example
+
+```
+namespace App.Admin.Api;
+
+use Runtime.Serializer.MapType;
+use Runtime.ORM.Query;
+use Runtime.Web.Annotations.ApiMethod;
+use Runtime.Widget.Api.SearchApi;
+use Runtime.WordPress.Admin.AdminMiddleware;
+use App.Database.Item;
+
+
+class ItemSearchApi extends SearchApi
+{
+	/**
+	 * Returns api name
+	 */
+	pure string getApiName() => "admin.item";
+	
+	
+	/**
+	 * Returns record name
+	 */
+	pure string getRecordName() => classof Item;
+	
+	
+	/**
+	 * Returns middleware
+	 */
+	Vector<Middleware> getMiddleware() =>
+	[
+		new AdminMiddleware(),
+	];
+	
+	
+	/**
+	 * Returns data rules
+	 */
+	void getDataRules(MapType rules)
+	{
+	}
+	
+	
+	/**
+	 * Returns item fields
+	 */
+	Vector<string> getItemFields() =>
+	[
+		"id",
+		"name"
+	];
+	
+	
+	/**
+	 * Build Query
+	 */
+	async void buildQuery(Query q)
+	{
+	}
+	
+	
+	/**
+	 * Action search
+	 */
+	@ApiMethod{ "name": "search" }
+	async void actionSearch()
+	{
+		await parent();
+	}
+	
+	
+	/**
+	 * Action item
+	 */
+	@ApiMethod{ "name": "item" }
+	async void actionItem()
+	{
+		await parent();
+	}
+}
+```
+
+
+## SaveApi
+
+The `SaveApi` module provides basic functionality for creating API endpoints designed for saving (creating and updating) and deleting data in a database. It ensures robust data validation, handles CRUD operations, and offers flexible logic configuration through a hook system.
+
+**Key Features**
+
+-   **Automatic Save/Update**: Recognizing whether to create a new record or update an existing one based on the presence of a primary key.
+-   **Strict Data Validation**: Applying validation rules to the fields of each record.
+-   **Field Management**: Defining fields allowed for saving and fields to be returned in the response.
+-   **Lifecycle Hooks**: Extension points (`onSaveBefore`, `onSaveAfter`, `onDeleteBefore`, `onDeleteAfter`) for embedding business logic.
+
+Two main actions:
+-   `save`: Creating or updating a record.
+-   `delete`: Deleting a record by its primary key.
+
+
+## Methods SaveApi
+
+-   `getApiName()`: Returns a unique name for your API.
+-   `getRecordName()`: Returns the name of the Record class (entity) that the API works with.
+-   `getMiddleware()`: Defines a list of Middleware for processing requests.
+-   `getDataRules(MapType rules)`: Defines validation rules for incoming request parameters that are not fields of the record itself (e.g., `foreign_key`).
+-   `getItemRules(MapType rules)`: The most important method for defining validation and filtering rules for the record's own fields (`item`) coming from the client.
+-   `getItemFields()`: Returns `Vector<string>` with the names of the fields that should be returned in the response after saving.
+-   `getSaveFields()`: Returns `Vector<string>` with the names of the fields allowed to be saved. This is critically important for security, to prevent clients from modifying unauthorized fields. If the method returns null, all valid fields are saved.
+-   `convertItem(Map item)`: Allows transforming the record data before it is returned in the response.
+-   `buildQuery(Query q)`: Modifies the Query object before searching for an existing record in the `save` and `delete` methods.
+-   `onSaveBefore()`: Hook called before saving a record (creation/update). Ideal for automatically setting fields (`gmtime_add`, `gmtime_edit`) or executing business logic.
+-   `onSaveAfter()`: Hook called after a successful record save.
+-   `onDeleteBefore()`: Hook called before deleting a record. Ideal for checking access rights, or for the presence of related data.
+-   `onDeleteAfter()`: Hook called after a successful record delete.
+
+
+## Example SaveApi
+
+Continuing the example with the `Item` entity, to create an API for saving and deleting items, we can define the following class:
+
+```
+namespace App.Api;
+
+use Runtime.Widget.Api.SaveApi;
+use Runtime.Widget.Api.Rules.UniqueRules;
+use Runtime.WordPress.Admin.AdminMiddleware;
+use App.Database.Item;
+
+
+class ItemSaveApi extends SaveApi
+{
+	/**
+	 * Returns api name
+	 */
+	pure string getApiName() => "app.item";
+	
+	
+	/**
+	 * Returns record name
+	 */
+	pure string getRecordName() => classof Item;
+	
+	
+	/**
+	 * Returns middleware
+	 */
+	Vector<Middleware> getMiddleware() =>
+	[
+		new AdminMiddleware(),
+	];
+	
+	
+	/**
+	 * Returns save rules
+	 */
+	Vector<BaseRule> rules() =>
+	[
+		new UniqueRules{"field_name": "name"},
+	];
+	
+	
+	/**
+	 * Returns data rules
+	 */
+	void getDataRules(MapType rules)
+	{
+	}
+	
+	
+	/**
+	 * Returns item rules
+	 */
+	void getItemRules(MapType rules)
+	{
+		rules.addType("id", new IntegerType());
+		rules.addType("name", new Required());
+		rules.addType("name", new StringType());
+		rules.addType("description", new StringType());
+		rules.addType("category_id", new IntegerType());
+	}
+	
+	
+	/**
+	 * Returns item fields
+	 */
+	Vector<string> getItemFields() =>
+	[
+		"id",
+		"name",
+		"description",
+		"category_id",
+		"gmtime_add",
+		"gmtime_edit",
+	];
+	
+	
+	/**
+	 * Build query
+	 */
+	async void buildQuery(Query q)
+	{
+		await parent(q);
+		
+		if (this.foreign_key && this.foreign_key.has("category_id"))
+		{
+			q.where("category_id", "=", this.foreign_key.get("category_id"));
+		}
+	}
+	
+	
+	/**
+	 * Save before
+	 */
+	async void onSaveBefore()
+	{
+		await parent();
+	}
+	
+	
+	/**
+	 * Save after
+	 */
+	async void onSaveAfter()
+	{
+		await parent();
+	}
+	
+	
+	/**
+	 * Delete before
+	 */
+	async void onDeleteBefore()
+	{
+		await parent();
+		
+		/* Check if has orders */
+		if (this.item.get("has_orders"))
+		{
+			throw new ApiError(new RuntimeException(
+				"Cannot delete record because there are related orders."
+			));
+		}
+	}
+	
+	
+	/**
+	 * Delete after
+	 */
+	async void onDeleteAfter()
+	{
+	}
+	
+	
+	/**
+	 * Save action
+	 */
+	@ApiMethod{ "name": "save" }
+	async void actionSave()
+	{
+		await parent();
+	}
+	
+	
+	/**
+	 * Delete action
+	 */
+	@ApiMethod{ "name": "delete" }
+	async void actionDelete()
+	{
+		await parent();
+	}
+}
+```
+
+# Object-Relational Mapping
+
+Object-Relational Mapping (ORM) is a technology that allows you to work with a database.
+
+ORM architecture:
+- Connection
+- Query
+- Record
+- Relation
+
+# Connection
+
+## Connecting to the database
+
+```
+namespace App.Database;
+
+use Runtime.ORM.Database.ConnectionFactory;
+use Runtime.ORM.MySQL.ConnectionMySQL;
+
+class DatabaseConnection extends ConnectionFactory
+{
+    async ConnectionMySQL createConnection()
+    {
+        ConnectionMySQL conn = new ConnectionMySQL();
+        conn.host = @.env("MYSQL_HOST");
+        conn.port = @.env("MYSQL_PORT");
+        conn.login = @.env("MYSQL_LOGIN");
+        conn.password = @.env("MYSQL_PASSWORD);
+        conn.database = @.env("MYSQL_DATABASE");
+        return conn;
+    }
+}
+```
+
+DatabaseConnection registration:
+```
+class ModuleDescription
+{
+	pure string getModuleName() => "App";
+    pure string getModuleVersion() = "1";
+    pure Map<string> requiredModules() => {
+        "Runtime": "*",
+    };
+    pure Vector<Entity> enities() => [
+        new DatabaseConnection(),
+    ];
+}
+```
+
+# Query
+
+An object that allows you to send SQL queries to the database.
+
+Example request:
+```
+Query q = new Query()
+    .select(["id", "name"])
+    .from("items")
+    .where("item", "=", "1")
+;
+
+Connection conn = Connection::get();
+QueryResult<Map> rows = await conn.fetchAll();
+```
+
+## Creating queries
+
+Get Raw SQL Query
+```
+Query raw(string sql, Map data);
+```
+
+Count the found lines
+```
+Query calcFoundRows(bool value = true);
+```
+
+Remove duplicates from the answer
+```
+Query distinct(bool value = true)
+```
+
+Enable query debugging
+```
+Query debug(bool value = true)
+```
+
+Execute a select query
+```
+Query select(Vector fields = null)
+```
+
+Specify the table name and its synonym
+```
+Query table(string table_name = "", string alias_name = "")
+Query from(string table_name = "", string alias_name = "")
+```
+
+Run a query to insert data
+```
+Query insert(string table_name = "")
+```
+
+Example:
+```
+Query q = new Query()
+    .insert("items")
+    .values({
+        "name": "item",
+    });
+
+Connection conn = Connection::get();
+await conn.execute(q);
+```
+
+Run a data update query
+```
+Query update(string table_name = "")
+```
+
+Example:
+```
+Query q = new Query()
+    .update("items")
+    .where("id", "=", 1)
+    .values({
+        "name": "item",
+    })
+;
+
+Connection conn = Connection::get();
+await conn.execute(q);
+```
+
+Perform a data deletion request
+```
+Query delete(string table_name = "")
+```
+
+Example:
+```
+Query q = new Query()
+    .delete("items")
+    .where("id", "=", 1)
+;
+
+Connection conn = Connection::get();
+await conn.execute(q);
+```
+
+Get the query type (select, insert, update, delete, raw)
+```
+Query kind(string kind)
+```
+
+
+## List of request fields
+
+Clear fields
+```
+Query clearFields()
+```
+
+Replace query fields with others
+```
+Query fields(Vector<string> fields)
+```
+
+Add a query field
+```
+Query addField(string field)
+```
+
+Add a raw query field. This is needed for queries like `count(*) as c` or full-text queries.
+```
+Query addRawField(string field_name)
+```
+
+Add a field list
+```
+Query addFields(Collection<string> fields)
+```
+
+
+## Request values
+
+Add value
+```
+Query value(string key, string value)
+```
+
+Add a list of values
+```
+Query values(Dict data)
+Query data(Dict data)
+```
+
+
+## Pagination
+
+Set page number. Page starts at zero.
+```
+Query page(int page, int limit = null)
+```
+
+Set the offset
+```
+Query offset(int start)
+Query start(int start)
+```
+
+Set line limit
+```
+Query limit(int limit)
+```
+
+Get the current page number. Calculated as offset / limit
+```
+int getPage()
+```
+
+Get list of pages
+```
+int getPages(int rows)
+```
+
+
+## Sort
+
+Clear sort
+```
+Query clearOrder()
+```
+
+Sort by field name
+```
+Query orderBy(string name, string sort)
+```
+
+
+## Filter
+
+Search by field value
+```
+Query where(string key, string op, var value)
+```
+
+Setup new filter
+```
+Query setFilter(Collection<QueryFilter> filter)
+```
+
+Add filter
+```
+Query addFilter(var filter)
+```
+
+Add or
+```
+Query addOrFilter(Collection filter)
+```
+
+Clear filter
+```
+Query clearFilter()
+```
+
+
+## Inner join
+
+```
+Query innerJoin(string table_name, Collection filter, string alias_name = "")
+Query leftJoin(string table_name, Collection filter, string alias_name = "")
+```
+
+# Record
+
+Example:
+```
+namespace App.Database;
+
+use Runtime.BaseObject;
+use Runtime.ORM.Record;
+use Runtime.ORM.Annotations.AutoIncrement;
+use Runtime.ORM.Annotations.BigIntType;
+use Runtime.ORM.Annotations.Primary;
+use Runtime.ORM.Annotations.StringType;
+
+
+class Item extends Record
+{
+	/**
+     * Returns table name
+     */
+    pure string getTableName() => "forms";
+	
+	
+	/**
+	 * Returns table schema
+	 */
+	pure memorize Collection<BaseObject> schema() =>
+	[
+		/* Fields */
+		new BigIntType{"name": "id"},
+		new StringType{"name": "name"},
+		new StringType{"name": "description"},
+		new BigIntType{"name": "category_id"},
+		new DateTimeType{"name": "gmtime_add", "autocreate": true},
+		new DateTimeType{"name": "gmtime_edit", "autoupdate": true},
+		
+		/* Index */
+		new AutoIncrement{"name": "id"},
+		new Primary{"keys": ["id"]},
+	];
+}
+```
+
+Get object from database
+```
+use Runtime.ORM.Relation;
+
+Relation<Item> relation = new Relation(classof Item);
+Record<Item> item = await relation.fetchRecord(
+    relation.select().where("id", "=", "1")
+);
+```
+
+Get primary key:
+```
+Map pk = item.getPrimaryKey();
+```
+
+Save item:
+```
+await item.save();
+```
+
+Delete item:
+```
+await item.delete();
+```
+
+Get objet data:
+```
+item.all();
+```
+
+Get old object data:
+```
+item.old();
+```
+
+Get only specific fields:
+```
+item.intersect(["id", "name"]);
+```
+
+Assign new data:
+```
+item.assign({
+    "name": "Name"
+})
+```
+
+Returns true if object is changed:
+```
+bool is_changed = item.isChanged();
+```
+
+Check if object is new:
+```
+bool is_new = item.isNew()
+```
+
+Check if object is loaded from database:
+```
+bool is_update = item.isUpdate();
+```
+
+# Relation
+
+
+## Example record
+
+```
+namespace App;
+
+use Runtime.BaseObject;
+use Runtime.ORM.Record;
+use Runtime.ORM.Annotations.AutoIncrement;
+use Runtime.ORM.Annotations.BigIntType;
+use Runtime.ORM.Annotations.Primary;
+use Runtime.ORM.Annotations.StringType;
+
+class Item extends Record
+{
+	/**
+	 * Returns table name
+	 */
+	pure string getTableName() => "items";
+	
+	
+	/**
+	 * Returns table schema
+	 */
+	pure memorize Collection<BaseObject> schema() =>
+	[
+		/* Fields */
+		new BigIntType{"name": "id"},
+		new StringType{"name": "name"},
+		new DateTimeType{"name": "gmtime_create", "autocreate": true},
+		new DateTimeType{"name": "gmtime_update", "autoupdate": true},
+		
+		/* Index */
+		new AutoIncrement{"name": "id"},
+		new Primary{"keys": ["id"]},
+	];
+}
+```
+
+## Create Relation
+
+```
+use Runtime.ORM.Relation;
+
+Relation<Item> relation = new Relation(classof Item);
+```
+
+
+## Create Record
+
+```
+Record createRecord(Map data = null);
+```
+
+Example:
+```
+/* Create item */
+Record<Item> item = relation.createRecord({
+	"name": "Item",
+});
+
+/* Or */
+Item item = new Item();
+await item.save();
+
+/* Refresh item */
+await item.refresh();
+DateTime gmtime_create = item.gmtime_create;
+```
+
+
+## Annotation
+
+Gets a list of all annotations for a Relation. Annotations are the data schema.
+```
+Vector<BaseObject> getAnotations();
+```
+
+Gets the annotation for the counter field.
+```
+AutoIncrement getAutoIncrement();
+```
+
+Gets a list of primary keys for a Relation
+```
+Vector<string> getPrimaryKeys();
+```
+
+Get the primary key from the data
+```
+Map getPrimaryKey(Map data);
+```
+
+Gets a filter for the primary key. The use_full_key parameter appends the table name to the field name.
+```
+Vector<QueryFilter> getPrimaryFilter(Map data, bool use_full_key = true);
+```
+
+Example
+```
+Relation relation = new Relation(classof Item);
+Map post_data = this.filter(this.request.data, new MapData{
+	"pk": relation.getPrimaryRules(),
+	"item": relation.getItemRules(),
+});
+
+/* Get primary key */
+Map pk = relation.getPrimaryFilter(post_data.get("item"));
+```
+
+## Data conversion
+
+Prepare data for saving to the database
+```
+async Map toDatabase(Map data);
+```
+
+Convert data from a database into primitive objects
+```
+async Map fromDatabase(Map data);
+```
+
+
+## Creating and deleting an object
+
+Save or create an object in the database
+```
+async void save(Record item);
+```
+
+Delete an object from the database
+```
+async void delete(Record item);
+```
+
+
+## Updating an object
+
+Update object data from the database. Useful when an object has been saved to the database and you need to retrieve a new version.
+```
+async void refresh(Record item);
+```
+
+
+## Database queries
+
+Creating a new query instance
+```
+Query query();
+Query select(Vector fields = null);
+```
+
+Get the query result
+```
+async QueryResult<Map> fetchAll(Query q)
+```
+
+Get the query result as a Record
+```
+async QueryResult<Record> fetchAllRecords(Query q)
+```
+
+Get only one line
+```
+async Map fetchOne(Query q)
+```
+
+Get only one Record
+```
+async Record fetchRecord(Query q)
+```
+
+Find rows by filter
+```
+async QueryResult find(Vector<QueryFilter> filter)
+```
+
+Find a Record by filter
+```
+async Record findRecord(Vector<QueryFilter> filter)
+```
+
+Find a Record by Primary Key
+```
+async Record findByPk(Map pk)
+async Record findById(var id)
+```
+
+Find or create an object by filter.
+```
+async Record findOrCreate(Map filter)
+```
+
+If the object doesn't exist in the database, a Record instance will be created. However, it won't appear in the database until after save().
+

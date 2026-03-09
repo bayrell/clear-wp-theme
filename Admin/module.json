@@ -10,8 +10,8 @@
 	"src": "./",
 	"dest":
 	{
-		"php": "../Source/php",
-		"es6": "../Source/es6"
+		"php": "../Source/php/Admin",
+		"es6": "../Source/es6/Admin"
 	},
 	"allow":
 	[

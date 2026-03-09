@@ -1,0 +1,9 @@
+---
+description: Project description
+allowApply: true
+---
+
+This is WordPress theme with BayLang framework.
+
+Rules:
+- Do not explore ./Source folder, because it contains compiled code
