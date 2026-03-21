@@ -4,6 +4,7 @@ use Runtime.Entity.Hook;
 use Runtime.Web.Annotations.Route;
 use Runtime.Web.Hooks.PageNotFound;
 use Runtime.Web.Hooks.Components;
+use Runtime.Web.Hooks.DetectLanguage;
 use Runtime.Web.Hooks.SetupLayout;
 
 
@@ -39,6 +40,11 @@ class ModuleDescription
 	[
 		/*new Hook("App.AppHook"),
 		new Hook("Runtime.WordPress.Theme.Metrika"),*/
+		
+		DetectLanguage::hook({
+			"default_language": "en",
+			"allowed_languages": ["en"],
+		}),
 		
 		/* Setup layout */
 		SetupLayout::hook({

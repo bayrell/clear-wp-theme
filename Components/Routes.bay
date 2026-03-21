@@ -5,6 +5,9 @@
 namespace App.Components;
 
 use Runtime.Web.BaseRoute;
+use Runtime.Web.RedirectResponse;
+use Runtime.Web.RenderContainer;
+use Runtime.Web.RouteAction;
 use Runtime.Web.RouteInfo;
 use Runtime.Web.RouteModel;
 use Runtime.Web.RoutePage;
@@ -25,15 +28,27 @@ class Routes extends BaseRoute
 	{
 		return
 		[
-			new RouteModel
+			new RouteAction
 			{
 				"uri": "/",
+				"name": "app:root",
+				"action": "actionRedirect",
+			},
+			new RouteAction
+			{
+				"uri": "/{lang}",
+				"name": "app:root:lang",
+				"action": "actionRedirect",
+			},
+			new RouteModel
+			{
+				"uri": "/{lang}/",
 				"name": "app:index",
 				"model": "App.Components.Pages.IndexPage.IndexPageModel",
 			},
 			new RoutePage
 			{
-				"uri": "/thank-you.html",
+				"uri": "/{lang}/thank-you.html",
 				"name": "app:thank_you_page",
 				"page": "App.Components.Pages.ThankYouPage",
 				"data": {
@@ -42,5 +57,16 @@ class Routes extends BaseRoute
 				},
 			},
 		];
+	}
+	
+	
+	/**
+	 * Action redirect
+	 */
+	static async void actionRedirect(RenderContainer container)
+	{
+		string lang = container.layout.lang;
+		if (container.route.name == "app:root") lang = "en";
+		container.setResponse(new RedirectResponse("/" ~ lang ~ "/"));
 	}
 }
